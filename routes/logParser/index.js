@@ -3,9 +3,10 @@
 const { Router } = require('express')
 
 const controllers = require('./controllers')
-const { errorHandler } = require('../../controllers')
+const { errorHandler } = require('../controllers')
+const { authMiddleware } = require('../middlewares')
 
-const { InvalidFilterTypeRequestError } = require('../errors')
+const { InvalidFilterTypeRequestError } = require('./errors')
 
 const router = Router()
 
@@ -16,6 +17,8 @@ const router = Router()
   *    get:
   *      summary: Get all NGINX logs
   *      tags: [Log Parser - NGINX]
+  *      security:
+  *        - Bearer: []
   *      responses:
   *        "200":
   *          description: All NGINX logs returned
@@ -24,17 +27,17 @@ const router = Router()
   *              schema:
   *                type: object
   *                properties:
-  *                message:
-  *                  type: string
-  *                payload:
-  *                  type: object
-  *                  properties:
-  *                    total:
-  *                      type: number
-  *                    logs:
-  *                      type: array
-  *                      items:
-  *                        type: string
+  *                  message:
+  *                    type: string
+  *                  payload:
+  *                    type: object
+  *                    properties:
+  *                      total:
+  *                        type: number
+  *                      logs:
+  *                        type: array
+  *                        items:
+  *                          type: string
   *              example:
   *                message: returning all logs
   *                payload:
@@ -42,7 +45,8 @@ const router = Router()
   *                  logs:
   *                    - 172.17.0.1 - - [01/Sep/2020:04:41:50 +0000] "GET / HTTP/1.1" 200 396 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"
   */
-router.get('/nginx/all/', errorHandler(async (_, res) => {
+router.get('/nginx/all/', authMiddleware, errorHandler(async (_, res) => {
+  console.log('reached here...')
   const logs = controllers.getAllLogs()
   res.status(200).json({
     message: 'returning all logs',
@@ -61,6 +65,8 @@ router.get('/nginx/all/', errorHandler(async (_, res) => {
   *    get:
   *      summary: Get filtered NGINX logs
   *      tags: [Log Parser - NGINX]
+  *      security:
+  *        - Bearer: []
   *      parameters:
   *        - in: path
   *          name: filterType
@@ -115,7 +121,8 @@ router.get('/nginx/all/', errorHandler(async (_, res) => {
   *              schema:
   *                type: object
   *                properties:
-  *                  message: string
+  *                  message:
+  *                    type: string
   *              examples:
   *                invalidFilterType:
   *                  value:
@@ -127,7 +134,7 @@ router.get('/nginx/all/', errorHandler(async (_, res) => {
   *                  value:
   *                    message: invalid condition range
   */
-router.get('/nginx/filter/:filterType/', errorHandler(async (req, res) => {
+router.get('/nginx/filter/:filterType/', authMiddleware, errorHandler(async (req, res) => {
   const { filterType } = req.params
   if (!filterType || !controllers.isValidFilterType(filterType)) {
     throw new InvalidFilterTypeRequestError()

@@ -1,30 +1,27 @@
 'use strict'
 
-const { BaseRequestError } = require('../errors')
-
-class InvalidFilterTypeRequestError extends BaseRequestError {
-  constructor(message='invalid filter type') {
-    super(message, 400, true)
-    this.message = message
+class NotImplementedError extends Error {
+  constructor(message='Module not implemented') {
+    super(message)
   }
 }
 
-class InvalidConditionValueRequestError extends BaseRequestError {
-  constructor(message='invalid condition value') {
-    super(message, 400, true)
-    this.message = message
+class BaseRequestError extends Error {
+  constructor(message, httpStatus, isWarning=false) {
+    super(message)
+    if (BaseRequestError === this.constructor) {
+      throw new NotImplementedError
+    }
+    this.isWarning = isWarning
+    this.httpStatus = httpStatus
   }
-}
 
-class InvalidConditionRangeRequestError extends BaseRequestError {
-  constructor(message='invalid condition range') {
-    super(message, 400, true)
-    this.message = message
+  setResponse = (res) => {
+    res.status(this.httpStatus).json({ message: this.message })
   }
 }
 
 module.exports = {
-  InvalidFilterTypeRequestError,
-  InvalidConditionValueRequestError,
-  InvalidConditionRangeRequestError,
+  NotImplementedError,
+  BaseRequestError,
 }

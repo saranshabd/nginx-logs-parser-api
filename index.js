@@ -18,5 +18,7 @@ const specs = swaggerJsdoc(require('./swagger-ui.config.json'))
 app.use('/api/v1/docs/', swaggerUi.serve);
 app.get('/api/v1/docs/', swaggerUi.setup(specs, { explorer: true }))
 
+app.use((_, res) => res.status(404).json({ message: 'endpoint not found' }))
+
 const port = process.env.PORT
 app.listen(port, console.log(`app running on port ${port}...`))
