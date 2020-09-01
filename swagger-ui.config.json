@@ -1,0 +1,18 @@
+{
+  "swaggerDefinition": {
+    "openapi": "3.0.0",
+    "info": {
+      "title": "nginx-logs-parser-api",
+      "version": "1.0.0",
+      "description": "REST API to get filtered NGINX logs"
+    },
+    "servers": [ 
+      {
+        "url": "http://localhost:8000"
+      }
+    ]
+  },
+  "apis": [
+    "./routes/**/*.js"
+  ]
+}
